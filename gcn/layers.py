@@ -1,23 +1,21 @@
 #!/usr/bin/env python3
 # -*- coding: utf-8 -*-
-"""
-Created on Wed Jul 29 10:07:22 2020
+###
+#Created on Wed Jul 29 10:07:22 2020
 
-@author: aurelien
-"""
+#@author: aurelien
+###
 
 from inits import *
 import tensorflow as tf
 
-flags=tf.app.flags
-FLAGS=flags.FLAGS
 
 # Dictionnaire des id de nos layers
 _LAYER_UIDS = {}
 
 
 def get_layer_uid(layer_name=''):
-    "Cette fonction permet d'assigner un nom unique à chaque layer"
+    #Cette fonction permet d'assigner un nom unique à chaque layer#
     if layer_name not in _LAYER_UIDS:
         _LAYER_UIDS[layer_name] = 1
         return 1
@@ -26,7 +24,7 @@ def get_layer_uid(layer_name=''):
         return _LAYER_UIDS[layer_name]
 
 def sparse_dropout(x, keep_prob, noise_shape):
-    "Le dropout est utilisé afin de ne pas surentrainé notre réseau, on va perturber nous même l'apprentissage en fixant un pourcentage de poids à 0"
+    #Le dropout est utilisé afin de ne pas surentrainé notre réseau, on va perturber nous même l'apprentissage en fixant un pourcentage de poids à 0#
     random_tensor = keep_prob
     random_tensor += tf.random_uniform(noise_shape)
     dropout_mask = tf.cast(tf.floor(random_tensor), dtype=tf.bool)
@@ -34,7 +32,7 @@ def sparse_dropout(x, keep_prob, noise_shape):
     return pre_out * (1./keep_prob)
 
 def dot(x, y, sparse=False):
-    "cette fonction permet de multiplié deux matrices en utilisant la méthode la plus approprié suivant leur forme"
+    #cette fonction permet de multiplié deux matrices en utilisant la méthode la plus approprié suivant leur forme#
     if sparse:
         res = tf.sparse_tensor_dense_matmul(x, y)
     else:
@@ -44,7 +42,7 @@ def dot(x, y, sparse=False):
 
 class Layer(object):
 
-"Un layer possède un nom qui définit la porté du layer, le logging permet de passer la représentation de notre layer sous forme d'histogramme sur 0/1.
+    #Un layer possède un nom qui définit la porté du layer, le logging permet de passer la représentation de notre layer sous forme d'histogramme sur 0/1.#
   
     def __init__(self, **kwargs):
         allowed_kwargs = {'name', 'logging'}
@@ -60,7 +58,7 @@ class Layer(object):
         self.logging = logging
         self.sparse_inputs = False
 
-"La fonction call prend les entrées du layer et retourne les sorties"        
+    #La fonction call prend les entrées du layer et retourne les sorties#        
     def _call(self, inputs):
         return inputs
     
@@ -78,7 +76,7 @@ class Layer(object):
             tf.summary.histogram(self.name + '/vars/' + var, self.vars[var])
             
 class Dense(Layer):
-    "Ici on déifnit un layer dense, "
+    #Ici on déifnit un layer dense, #
     
     
     def __init__(self, input_dim, output_dim, placeholders, dropout=0., sparse_inputs=False,
@@ -95,10 +93,9 @@ class Dense(Layer):
         self.featureless = featureless
         self.bias = bias
 
-        # helper variable for sparse dropout
         self.num_features_nonzero = placeholders['num_features_nonzero']
 
-	"on fixe les poids du layer grâce à l'initilisation de glorot et s'il y a des biais on les fixe sur zeros"
+        #on fixe les poids du layer grâce à l'initilisation de glorot et s'il y a des biais on les fixe sur zeros#
 	
 	
         with tf.variable_scope(self.name + '_vars'):
@@ -107,11 +104,10 @@ class Dense(Layer):
             if self.bias:
                 self.vars['bias'] = zeros([output_dim], name='bias')
 	
-	"Si l'affichage est sur on, on affiche toutes les données du layer"
+	   #Si l'affichage est sur on, on affiche toutes les données du layer#
         if self.logging:
             self._log_vars()
             
-	"On a ici la fonction pour appeler le layer"
 	
     def _call(self, inputs):
     
@@ -136,7 +132,8 @@ class Dense(Layer):
         
         
 class GraphConvolution(Layer):
-    """Graph convolution layer."""
+    ###On définit la fonction pour créer un layer convolutionnel###
+    
     def __init__(self, input_dim, output_dim, placeholders, dropout=0.,
                  sparse_inputs=False, act=tf.nn.relu, bias=False,
                  featureless=False, **kwargs):
@@ -167,9 +164,11 @@ class GraphConvolution(Layer):
             self._log_vars()
 
     def _call(self, inputs):
+        
+        #On prend les inputs X
         x = inputs
 
-        # dropout
+        # On applique un dropout sur X
         if self.sparse_inputs:
             x = sparse_dropout(x, 1-self.dropout, self.num_features_nonzero)
         else:
@@ -187,14 +186,13 @@ class GraphConvolution(Layer):
             supports.append(support)
         output = tf.add_n(supports)
 
-        # bias
+        # On ajoute les biais s'il y en a avant de retourner l'output qui passe par une fonction relu 
         if self.bias:
             output += self.vars['bias']
-
+            
         return self.act(output)
         
 if __name__=='__main__':
-    k=Layer(name="Jack",logging=False)
-    print(k.name)
+    pass
 
 
