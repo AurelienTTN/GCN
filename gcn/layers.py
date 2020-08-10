@@ -174,7 +174,7 @@ class GraphConvolution(Layer):
         else:
             x = tf.nn.dropout(x, 1-self.dropout)
 
-        # convolve
+        # Ici on applique une convolution 
         supports = list()
         for i in range(len(self.support)):
             if not self.featureless:
