@@ -6,10 +6,12 @@
 #@author: aurelien
 ###
 
+
 from inits import *
 import tensorflow as tf
 
-
+flags = tf.compat.v1.flags
+FLAGS = flags.FLAGS
 # Dictionnaire des id de nos layers
 _LAYER_UIDS = {}
 
